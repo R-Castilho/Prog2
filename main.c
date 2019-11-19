@@ -1,6 +1,6 @@
 #include<stdio.h>
 #include<stdlib.h>
-#include "prog2Utils.h" // biblioteca de funções auxiliares. Por exemplo editar informações de arquivos.
+
 #define CAPACIDADE_MAXIMA 100 // valor total para armazenar em uma estrutura
 
 struct aluno{
