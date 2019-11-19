@@ -25,7 +25,7 @@ struct aula{
 
 // aqui vão os protótipos de suas funções
 // por exemplo, uma função para salvar as aulas em um arquivo
-salver
+teste
 // função para mostrar menu na tela e ler opção digitada
 int lerOpcao();
 
