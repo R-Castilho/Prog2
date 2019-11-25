@@ -37,13 +37,10 @@
         
 
     // Protótipos 
-    // função para mostrar menu na tela e ler opção digitada
+    void iniciar(int *nAlunos, struct aluno *alunos);
+    void imprimeMenu();
     int lerOpcao();
 
-    // função para iniciar variáveis do programa
-    void iniciaPrograma(int *nAlunos, struct aluno *alunos);
-
-    //Protótipos de funções relacionadas a alunos
     struct aluno leAluno();
     int adicionaAluno(struct aluno aluno, struct aluno *alunos, int *nAlunos);
     void arquivaAlunos(struct aluno *alunos, int nAlunos);
@@ -72,9 +69,10 @@
 
       int opcao = 1;
 
-      iniciaPrograma(&nAlunos, alunos);
+      iniciar(&nAlunos, alunos);
       
       do{
+        imprimeMenu();
         opcao = lerOpcao();
         switch (opcao){
           case 1: // 1- Cadastrar aluno
@@ -88,8 +86,10 @@
               puts("Cadastro bem sucedido!\n");
             }
             else{
-              puts("ERRO! O aluno não foi cadastrado.");
+              puts("ERRO! O aluno não foi cadastrado.\n");
             }
+
+            arquivaAlunos(alunos, nAlunos);
 
             break;
 
@@ -112,7 +112,6 @@
             break;
 
           case 8:  // 8- Fechar o programa
-            arquivaAlunos(alunos, nAlunos);
             printf("Encerrando o programa\n");
             exit(0);
 
@@ -126,9 +125,9 @@
   
    }  // fim do main
 
-
-  int lerOpcao(){
-    int op;
+  // Funções auxiliares
+  
+  void imprimeMenu(){
     puts("Academia superação");
     puts("1- Cadastrar aluno");
     puts("2- Cadastrar professor");
@@ -137,13 +136,18 @@
     puts("5- Cancelar inscrição");
     puts("6- Fechar turmas");
     puts("7- Confirmar turmas");
-    puts("8- Salvar e sair");
+    puts("8- Sair");
+  }
+  // função para mostrar menu na tela e ler opção digitada
+  int lerOpcao(){
+    int op;
     puts("Digite a opcao: ");
     scanf("%d", &op);
     return op;
   }
 
-  void iniciaPrograma(int *nAlunos, struct aluno *alunos){
+  // função para iniciar variáveis do programa
+  void iniciar(int *nAlunos, struct aluno *alunos){
     *nAlunos = 0;
     FILE *fAlunos = fopen("alunos.csv", "r");
     if(fAlunos == NULL){
@@ -157,6 +161,7 @@
     fclose(fAlunos);
   }
 
+  // Funções de Aluno
   // Lê da entrada padrão e retorna um novo aluno
   struct aluno leAluno(){
     struct aluno alu;
@@ -200,6 +205,7 @@
     return 0;
   }
 
+  // Escreve os alunos em memória no arquivo
   void arquivaAlunos(struct aluno *alunos, int nAlunos){
     FILE *fAlunos = fopen("alunos.csv", "w");
     if(fAlunos == NULL){
