@@ -180,16 +180,20 @@
   // Retorno: 1 se for bem sucedido, caso contrário, 0.
   int adicionaAluno(struct aluno novoAluno, struct aluno *alunos, int *nAlunos){
     if(*nAlunos < CAPACIDADE_MAXIMA){
+      int repetido = 0;
       for(int i = 0; i < *nAlunos; i++){
         if(alunos[i].id == novoAluno.id){
-          puts("Já existe um aluno cadastrado com este ID.");
-          return 0;
+          repetido = 1;
         }
-        else{
-          alunos[*nAlunos] = novoAluno;
-          *nAlunos = *nAlunos + 1;
-          return 1;
-        }
+      }
+      if(repetido){
+        puts("Já existe um aluno cadastrado com este ID.");
+        return 0;
+      }
+      else{
+        alunos[*nAlunos] = novoAluno;
+        *nAlunos = *nAlunos + 1;
+        return 1;
       }
     }
     else{puts("Limite de alunos atingindo!");}
