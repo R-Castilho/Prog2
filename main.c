@@ -1,5 +1,6 @@
 #include<stdio.h>
 #include<stdlib.h>
+#include<string.h>
 #define CAPACIDADE_MAXIMA 100 // valor total para armazenar em uma estrutura
     
     struct aluno{
@@ -40,7 +41,7 @@
     int lerOpcao();
 
     // função para iniciar variáveis do programa
-    void iniciaPrograma(int *nAlunos);
+    void iniciaPrograma(int *nAlunos, struct aluno *alunos);
 
     //Protótipos de funções relacionadas a alunos
     struct aluno leAluno();
@@ -71,7 +72,7 @@
 
       int opcao = 1;
 
-      iniciaPrograma(&nAlunos);
+      iniciaPrograma(&nAlunos, alunos);
       
       do{
         opcao = lerOpcao();
@@ -142,14 +143,17 @@
     return op;
   }
 
-  void iniciaPrograma(int *nAlunos){
-    nAlunos = 0;
+  void iniciaPrograma(int *nAlunos, struct aluno *alunos){
+    *nAlunos = 0;
     FILE *fAlunos = fopen("alunos.csv", "r");
     if(fAlunos == NULL){
       printf("Erro de I/O");
       exit(1);
     }
     //Carregar alunos do arquivo
+    while(fscanf(fAlunos, "%i,%[^,],%[^,],%[^,],%[^\n]", &alunos[*nAlunos].id, alunos[*nAlunos].nome, alunos[*nAlunos].cpf, alunos[*nAlunos].telefone, alunos[*nAlunos].email) != EOF){
+      *nAlunos += 1;
+    }
     fclose(fAlunos);
   }
 
