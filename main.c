@@ -37,16 +37,20 @@
         
 
     // Protótipos 
-    void iniciar(int *nAlunos, struct aluno *alunos);
-    void imprimeMenu();
+    // Gerais
+    void iniciar(int *nAlunos, struct aluno *alunos, int *nProfs, struct professor *professores);
+    void imprimirMenu();
     int lerOpcao();
 
+    // Alunos
     struct aluno leAluno();
     int adicionaAluno(struct aluno aluno, struct aluno *alunos, int *nAlunos);
     void arquivaAlunos(struct aluno *alunos, int nAlunos);
     
-    struct professor CadastraProfessores();
-    void arquivaProfessor(struct professor professor);
+    // Professores
+    struct professor leProf();
+    int adicionaProf(struct professor novoProf, struct professor *professores, int *nProfs);
+    void arquivaProfs(struct professor *professores, int nProfs);
     
     void cadastraAula(struct aula aula);
     void inscreverAluno(int id_aluno, int id_turma);
@@ -65,23 +69,21 @@
       struct inscricao inscricoes[CAPACIDADE_MAXIMA];
       //int nInscricoes;
       struct professor professores[CAPACIDADE_MAXIMA];
-      //int nProfessores;
+      int nProfs;
 
       int opcao = 1;
 
-      iniciar(&nAlunos, alunos);
+      iniciar(&nAlunos, alunos, &nProfs, professores);
       
       do{
-        imprimeMenu();
+        imprimirMenu();
         opcao = lerOpcao();
         switch (opcao){
           case 1: // 1- Cadastrar aluno
             if(0){}; //P.O.G
 
-            //Ler novo aluno da entrada padrão
             struct aluno novoAluno = leAluno();
 
-            //Adicionar a alunos
             if(adicionaAluno(novoAluno, alunos, &nAlunos)){
               puts("Cadastro bem sucedido!\n");
             }
@@ -94,6 +96,18 @@
             break;
 
           case 2: // 2-  Cadastrar professor
+            if(0){}; //P.O.G
+            struct professor novoProf = leProf();
+
+            if(adicionaProf(novoProf, professores, &nProfs)){
+              puts("Cadastro bem sucedido!\n");
+            }
+            else{
+              puts("ERRO! O professor não foi cadastrado.\n");
+            }
+
+            arquivaProfs(professores, nProfs);
+
             break;
 
           case 3: // 3- Cadastrar turma
@@ -126,8 +140,8 @@
    }  // fim do main
 
   // Funções auxiliares
-  
-  void imprimeMenu(){
+  // Função para imprimir na saída padrão o menu de funções do sistema
+  void imprimirMenu(){
     puts("Academia superação");
     puts("1- Cadastrar aluno");
     puts("2- Cadastrar professor");
@@ -138,7 +152,7 @@
     puts("7- Confirmar turmas");
     puts("8- Sair");
   }
-  // função para mostrar menu na tela e ler opção digitada
+  // Função para mostrar menu na tela e ler opção digitada
   int lerOpcao(){
     int op;
     puts("Digite a opcao: ");
@@ -146,19 +160,31 @@
     return op;
   }
 
-  // função para iniciar variáveis do programa
-  void iniciar(int *nAlunos, struct aluno *alunos){
+  // Função para iniciar variáveis do programa
+  void iniciar(int *nAlunos, struct aluno *alunos, int *nProfs, struct professor *professores){
+    // Carregar alunos do arquivo
     *nAlunos = 0;
     FILE *fAlunos = fopen("alunos.csv", "r");
     if(fAlunos == NULL){
       printf("Erro de I/O");
       exit(1);
     }
-    //Carregar alunos do arquivo
     while(fscanf(fAlunos, "%i,%[^,],%[^,],%[^,],%[^\n]", &alunos[*nAlunos].id, alunos[*nAlunos].nome, alunos[*nAlunos].cpf, alunos[*nAlunos].telefone, alunos[*nAlunos].email) != EOF){
       *nAlunos += 1;
     }
     fclose(fAlunos);
+
+    // Carregar professores do arquivo
+    *nProfs = 0;
+    FILE *fProfs = fopen("professores.csv", "r");
+    if(fProfs == NULL){
+      printf("Erro de I/O");
+      exit(1);
+    }
+    while(fscanf(fProfs, "%i,%[^,],%[^,],%[^,],%[^\n]", &professores[*nProfs].id, professores[*nProfs].nome, professores[*nProfs].cpf, professores[*nProfs].telefone, professores[*nProfs].email) != EOF){
+      *nProfs += 1;
+    }
+    fclose(fProfs);
   }
 
   // Funções de Aluno
@@ -166,7 +192,7 @@
   struct aluno leAluno(){
     struct aluno alu;
 
-    printf("Cadastro Aluno:");
+    printf("Cadastro de Aluno:");
     printf("\nId: ");
     scanf("%d", &alu.id);
     printf("Nome: ");
@@ -180,7 +206,6 @@
 
     return alu;
   }
-
   // Tenta adicionar um novo aluno à lista atual de alunos em memória.
   // Retorno: 1 se for bem sucedido, caso contrário, 0.
   int adicionaAluno(struct aluno novoAluno, struct aluno *alunos, int *nAlunos){
@@ -204,8 +229,7 @@
     else{puts("Limite de alunos atingindo!");}
     return 0;
   }
-
-  // Escreve os alunos em memória no arquivo
+  // Escreve os alunos da memória no arquivo
   void arquivaAlunos(struct aluno *alunos, int nAlunos){
     FILE *fAlunos = fopen("alunos.csv", "w");
     if(fAlunos == NULL){
@@ -218,21 +242,61 @@
     fclose(fAlunos);
   }
 
-  struct professor cadastraProfessores (){
+
+  // Funções de Professor
+  // Lê da entrada padrão e retorna um novo professor
+  struct professor leProf(){
     
     struct professor prof;
     
-    printf("Cadastro Professor:");
-    printf("\n Id: ");
+    printf("Cadastro de Professor:");
+    printf("\nId: ");
     scanf("%d", &prof.id);
-    printf("\n Nome: ");
+    printf("Nome: ");
     scanf("%s", prof.nome);
-    printf("\n CPF: ");
+    printf("CPF: ");
     scanf("%s", prof.cpf);
-    printf("\n Telefone: ");
+    printf("Telefone: ");
     scanf("%s", prof.telefone);
-    printf("\n E-mail: ");
+    printf("E-mail: ");
     scanf("%s", prof.email);
     
     return prof;
+  }
+
+  // Tenta adicionar um novo professor à lista atual de professores em memória.
+  // Retorno: 1 se for bem sucedido, caso contrário, 0.
+  int adicionaProf(struct professor novoProf, struct professor *professores, int *nProfs){
+    if(*nProfs < CAPACIDADE_MAXIMA){
+      int repetido = 0;
+      for(int i = 0; i < *nProfs; i++){
+        if(professores[i].id == novoProf.id){
+          repetido = 1;
+        }
+      }
+      if(repetido){
+        puts("Já existe um professor cadastrado com este ID.");
+        return 0;
+      }
+      else{
+        professores[*nProfs] = novoProf;
+        *nProfs = *nProfs + 1;
+        return 1;
+      }
+    }
+    else{puts("Limite de professores atingindo!");}
+    return 0;
+  }
+
+
+  void arquivaProfs(struct professor *professores, int nProfs){
+    FILE *fProfs = fopen("professores.csv", "w");
+    if(fProfs == NULL){
+      printf("Erro de I/O");
+      exit(1);
+    }
+    for(int i = 0; i < nProfs; i++){
+      fprintf(fProfs, "%d,%s,%s,%s,%s\n", professores[i].id, professores[i].nome, professores[i].cpf, professores[i].telefone, professores[i].email);
+    }
+    fclose(fProfs);
   }
