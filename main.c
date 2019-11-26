@@ -38,7 +38,7 @@ struct inscricao{
 
 // Protótipos 
 // Gerais
-void iniciar(int *nAlunos, struct aluno *alunos, int *nProfs, struct professor *professores, int *nAulas, struct aula *aulas);
+void iniciar(int *nAlunos, struct aluno *alunos, int *nProfs, struct professor *professores, int *nAulas, struct aula *aulas, int *nInscs, struct inscricao *inscricoes);
 void imprimirMenu();
 int lerOpcao();
 
@@ -52,12 +52,17 @@ struct professor leProf();
 int adicionaProf(struct professor novoProf, struct professor *professores, int *nProfs);
 void arquivaProfs(struct professor *professores, int nProfs);
 
+// Aulas
 struct aula leAula();
 int adicionaAula(struct aula novoAula, struct aula *aulas, int *nAulas, struct professor *professores, int nProfs);
 void arquivaAulas(struct aula *aulas, int nAulas);
 
-void inscreverAluno(int id_aluno, int id_turma);
-void cancelarInscricao(int id_aluno, int id_turma);
+// Inscrições
+struct inscricao leInsc();
+int adicionaInsc(struct inscricao novoInsc, struct inscricao *inscricoes, int *nInscs, struct aluno *alunos, int nAlunos, struct aula *aulas, int nAulas);
+void arquivaInscs(struct inscricao *inscricoes, int nInscs);
+//void cancelaInsc(struct inscricao novoInsc);
+
 void fecharTurma(int n_alunos);
 void confirmarTurmas();
 void fecharPrograma();
@@ -75,13 +80,12 @@ int main (){
   int nAulas;
 
   struct inscricao inscricoes[CAPACIDADE_MAXIMA];
-  //int nInscricoes;
+  int nInscs;
 
-  
 
   int opcao = 1;
 
-  iniciar(&nAlunos, alunos, &nProfs, professores, &nAulas, aulas);
+  iniciar(&nAlunos, alunos, &nProfs, professores, &nAulas, aulas, &nInscs, inscricoes);
   
   do{
     imprimirMenu();
@@ -135,6 +139,19 @@ int main (){
         break;
         
       case 4:  // 4- Inscrever aluno
+        if(0){}; //P.O.G
+
+        struct inscricao novoInsc = leInsc();
+
+        if(adicionaInsc(novoInsc, inscricoes, &nInscs, alunos, nAlunos, aulas, nAulas)){
+          puts("Inscrição bem sucedida!\n");
+        }
+        else{
+          puts("ERRO! O aluno não foi inscrito.\n");
+        }
+
+        arquivaInscs(inscricoes, nInscs);
+
         break;
         
       case 5:  // 5- Cancelar inscrição
@@ -182,7 +199,7 @@ int lerOpcao(){
 }
 
 // Função para iniciar variáveis do programa
-void iniciar(int *nAlunos, struct aluno *alunos, int *nProfs, struct professor *professores, int *nAulas, struct aula *aulas){
+void iniciar(int *nAlunos, struct aluno *alunos, int *nProfs, struct professor *professores, int *nAulas, struct aula *aulas, int *nInscs, struct inscricao *inscricoes){
   // Carregar alunos do arquivo
   *nAlunos = 0;
   FILE *fAlunos = fopen("alunos.csv", "r");
@@ -218,6 +235,17 @@ void iniciar(int *nAlunos, struct aluno *alunos, int *nProfs, struct professor *
     *nAulas += 1;
   }
   fclose(fAulas);
+
+  // Carregar inscrições do arquivo
+  *nInscs = 0;
+  FILE *fInscs = fopen("inscricoes.csv", "r");
+  if(fInscs == NULL){
+    printf("Erro de I/O");
+    exit(1);
+  }
+  while(fscanf(fInscs, "%i,%i", &inscricoes[*nInscs].id_aluno, &inscricoes[*nInscs].id_aula) != EOF){
+    *nInscs += 1;
+  }
 }
 
 // Funções de Aluno
@@ -406,3 +434,71 @@ void arquivaAulas(struct aula *aulas, int nAulas){
   }
   fclose(fAulas);
 }
+
+
+// Funções de inscrição
+// Lê da entrada padrão e retorna uma nova inscrição
+struct inscricao leInsc(){
+  struct inscricao novoInsc;
+
+  printf("Nova inscrição:");
+  printf("\nId do aluno: ");
+  scanf("%d", &novoInsc.id_aluno);
+  printf("Id da aula: ");
+  scanf(" %d", &novoInsc.id_aula);
+
+  return novoInsc;
+}
+
+int adicionaInsc(struct inscricao novoInsc, struct inscricao *inscricoes, int *nInscs, struct aluno *alunos, int nAlunos, struct aula *aulas, int nAulas){
+  if(*nInscs < CAPACIDADE_MAXIMA){
+    int repetido = 0; // Checa se a inscrição já existe no banco de dados
+    for(int i = 0; i < *nInscs; i++){
+      if(inscricoes[i].id_aluno == novoInsc.id_aluno && inscricoes[i].id_aula == novoInsc.id_aula){
+        repetido = 1;
+      }
+    }
+    if(repetido){
+      puts("Esta inscrição já existe.");
+      return 0;
+    }
+    else{
+      int alunoExiste = 0; // Checa se o id_aluno informado está atrelado a algum aluno registrado no banco de dados
+      for(int i = 0; i < nAlunos; i++){
+        if(alunos[i].id == novoInsc.id_aluno){
+          alunoExiste = 1;
+        }
+      }
+      int aulaExiste = 0; // Checa se o id_aula informado está atrelado a alguma aula registrada no banco de dados
+      for(int i = 0; i < nAulas; i++){
+        if(aulas[i].id == novoInsc.id_aula){
+          aulaExiste = 1;
+        }
+      }
+      if(alunoExiste && aulaExiste){ 
+        inscricoes[*nInscs] = novoInsc;
+        *nInscs = *nInscs + 1;
+        return 1;
+      }
+      else{
+        puts("Não existe aula ou aluno com o ID informado para a inscrição.");
+        return 0;
+      }
+    }
+  }
+  else{puts("Limite de inscrições atingindo!");}
+  return 0;
+}
+
+void arquivaInscs(struct inscricao *inscricoes, int nInscs){
+  FILE *fInscs = fopen("inscricoes.csv", "w");
+  if(fInscs == NULL){
+    printf("Erro de I/O");
+    exit(1);
+  }
+  for(int i = 0; i < nInscs; i++){
+    fprintf(fInscs, "%i,%i\n", inscricoes[i].id_aluno, inscricoes[i].id_aula);
+  }
+  fclose(fInscs);
+}
+  
