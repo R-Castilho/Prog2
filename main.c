@@ -36,7 +36,7 @@ struct inscricao{
 };
     
 
-// Protótipos 
+// Protótipos das funções
 // Gerais
 void iniciar(int *nAlunos, struct aluno *alunos, int *nProfs, struct professor *professores, int *nAulas, struct aula *aulas, int *nInscs, struct inscricao *inscricoes);
 void imprimirMenu();
@@ -46,26 +46,31 @@ int lerOpcao();
 struct aluno leAluno();
 int adicionaAluno(struct aluno aluno, struct aluno *alunos, int *nAlunos);
 void arquivaAlunos(struct aluno *alunos, int nAlunos);
+int existeAluno(int id_aluno, struct aluno *alunos, int nAlunos);
 
 // Professores
 struct professor leProf();
 int adicionaProf(struct professor novoProf, struct professor *professores, int *nProfs);
 void arquivaProfs(struct professor *professores, int nProfs);
+int existeProf(int id_prof, struct professor *professores, int nProfs);
 
 // Aulas
 struct aula leAula();
 int adicionaAula(struct aula novoAula, struct aula *aulas, int *nAulas, struct professor *professores, int nProfs);
 void arquivaAulas(struct aula *aulas, int nAulas);
+int existeAula(int id_aula, struct aula *aulas, int nAulas);
+struct aula getAula(int id_aula, struct aula *aulas, int nAulas);
 
 // Inscrições
 struct inscricao leInsc();
 int adicionaInsc(struct inscricao novoInsc, struct inscricao *inscricoes, int *nInscs, struct aluno *alunos, int nAlunos, struct aula *aulas, int nAulas);
 void arquivaInscs(struct inscricao *inscricoes, int nInscs);
+int existeInsc(int id_aluno, int id_aula, struct inscricao *inscricoes, int nInscs);
+int contaInscs(int id_aula, struct inscricao *inscricoes, int nInscs);
 //void cancelaInsc(struct inscricao novoInsc);
 
-void fecharTurma(int n_alunos);
-void confirmarTurmas();
-void fecharPrograma();
+//void fecharTurma(int n_alunos);
+//void confirmarTurmas();
 
 // Programa Principal 
 int main (){
@@ -155,12 +160,23 @@ int main (){
         break;
         
       case 5:  // 5- Cancelar inscrição
+        if(0){};
+        struct inscricao deletaInsc = leInsc();
+
+        // TODO: checar se existe -> existeInsc()
+        
+        // TODO: remover inscrição do array e atualizar n <<<
+        // TODO: escrever novo array no arquivo -> arquivaInscs()
+        // TODO: Adicionar uma entrada no arquivo r_incricoesCanceladas.csv <<
         break;
   
       case 6:  // 6- Fechar turmas
+      // TODO: Solicita um numero de alunos X < 
+      // TODO: Fechar quaisquer turmas que estejam abaixo de X alunos e gera um arquivo r_aulasCanceladas.csv << R
         break;
       
       case 7:  // 7- Confirmar turmas
+      // TODO: Gera um arquivo r_aulasConfirmadas.csv que contém todas as aulas confirmadas. <
         break;
 
       case 8:  // 8- Fechar o programa
@@ -271,13 +287,7 @@ struct aluno leAluno(){
 // Retorno: 1 se for bem sucedido, caso contrário, 0.
 int adicionaAluno(struct aluno novoAluno, struct aluno *alunos, int *nAlunos){
   if(*nAlunos < CAPACIDADE_MAXIMA){
-    int repetido = 0; // Checa se o ID informado para o aluno já existe no banco de dados
-    for(int i = 0; i < *nAlunos; i++){
-      if(alunos[i].id == novoAluno.id){
-        repetido = 1;
-      }
-    }
-    if(repetido){
+    if(existeAluno(novoAluno.id, alunos, *nAlunos)){
       puts("Já existe um aluno cadastrado com este ID.");
       return 0;
     }
@@ -301,6 +311,17 @@ void arquivaAlunos(struct aluno *alunos, int nAlunos){
     fprintf(fAlunos, "%d,%s,%s,%s,%s\n", alunos[i].id, alunos[i].nome, alunos[i].cpf, alunos[i].telefone, alunos[i].email);
   }
   fclose(fAlunos);
+}
+// Verifica se um aluno existe no Banco de Dados
+int existeAluno(int id_aluno, struct aluno *alunos, int nAlunos){
+  int existe = 0;
+  for(int i = 0; i < nAlunos; i++){
+    if(alunos[i].id == id_aluno){
+      existe = 1;
+      break;
+    }
+  }
+  return existe;
 }
 
 
@@ -329,13 +350,7 @@ struct professor leProf(){
 // Retorno: 1 se for bem sucedido, caso contrário, 0.
 int adicionaProf(struct professor novoProf, struct professor *professores, int *nProfs){
   if(*nProfs < CAPACIDADE_MAXIMA){
-    int repetido = 0; // Checa se o ID informado para o professor já existe no banco de dados
-    for(int i = 0; i < *nProfs; i++){
-      if(professores[i].id == novoProf.id){
-        repetido = 1;
-      }
-    }
-    if(repetido){
+    if(existeProf(novoProf.id, professores, *nProfs)){
       puts("Já existe um professor cadastrado com este ID.");
       return 0;
     }
@@ -360,6 +375,17 @@ void arquivaProfs(struct professor *professores, int nProfs){
     fprintf(fProfs, "%d,%s,%s,%s,%s\n", professores[i].id, professores[i].nome, professores[i].cpf, professores[i].telefone, professores[i].email);
   }
   fclose(fProfs);
+}
+// Verifica se o professor existe no Banco de Dados
+int existeProf(int id_prof, struct professor *professores, int nProfs){
+  int existe = 0;
+  for(int i = 0; i < nProfs; i++){
+    if(professores[i].id == id_prof){
+      existe = 1;
+      break;
+    }
+  }
+  return existe;
 }
 
 // Funções de aula
@@ -391,24 +417,13 @@ struct aula leAula(){
 // Retorno: 1 se for bem sucedido, caso contrário, 0.
 int adicionaAula(struct aula novoAula, struct aula *aulas, int *nAulas, struct professor *professores, int nProfs){ 
   if(*nAulas < CAPACIDADE_MAXIMA){
-    int repetido = 0; // Checa se o ID informado para a aula já existe no banco de dados
-    for(int i = 0; i < *nAulas; i++){
-      if(aulas[i].id == novoAula.id){
-        repetido = 1;
-      }
-    }
-    if(repetido){
+    
+    if(existeAula(novoAula.id, aulas, *nAulas)){
       puts("Já existe uma aula cadastrada com este ID.");
       return 0;
     }
     else{
-      int profExiste = 0; // Checa se o ID_PROF informado para a nova aula está atrelado a algum professor registrado no banco de dados
-      for(int i = 0; i < nProfs; i++){
-        if(professores[i].id == novoAula.id_prof){
-          profExiste = 1;
-        }
-      }
-      if(profExiste){ 
+      if(existeProf(novoAula.id_prof, professores, nProfs)){ 
         aulas[*nAulas] = novoAula;
         *nAulas = *nAulas + 1;
         return 1;
@@ -418,8 +433,9 @@ int adicionaAula(struct aula novoAula, struct aula *aulas, int *nAulas, struct p
         return 0;
       }
     }
-  }
-  else{puts("Limite de aulas atingindo!");}
+  }else{
+    puts("Limite de aulas atingindo!");
+ }
   return 0;
 };
 // Escreve as aulas da memória no arquivo
@@ -435,13 +451,32 @@ void arquivaAulas(struct aula *aulas, int nAulas){
   fclose(fAulas);
 }
 
+int existeAula(int id_aula, struct aula *aulas, int nAulas){
+  int existe = 0; // Checa se o ID informado para a aula já existe no banco de dados
+  for(int i = 0; i < nAulas; i++){
+    if(aulas[i].id == id_aula){
+      existe = 1;
+    }
+  }
+  return existe;
+}
+// Retorna uma aula, dado seu id
+struct aula getAula(int id_aula, struct aula *aulas, int nAulas){
+  struct aula ret;
+  for(int i = 0; i < nAulas; i++){
+    if(aulas[i].id == id_aula){
+      ret = aulas[i];
+    }
+  }
+  return ret;
+}
 
 // Funções de inscrição
 // Lê da entrada padrão e retorna uma nova inscrição
 struct inscricao leInsc(){
   struct inscricao novoInsc;
 
-  printf("Nova inscrição:");
+  printf("Digite os dados da inscrição:");
   printf("\nId do aluno: ");
   scanf("%d", &novoInsc.id_aluno);
   printf("Id da aula: ");
@@ -451,34 +486,24 @@ struct inscricao leInsc(){
 }
 
 int adicionaInsc(struct inscricao novoInsc, struct inscricao *inscricoes, int *nInscs, struct aluno *alunos, int nAlunos, struct aula *aulas, int nAulas){
-  if(*nInscs < CAPACIDADE_MAXIMA){
-    int repetido = 0; // Checa se a inscrição já existe no banco de dados
-    for(int i = 0; i < *nInscs; i++){
-      if(inscricoes[i].id_aluno == novoInsc.id_aluno && inscricoes[i].id_aula == novoInsc.id_aula){
-        repetido = 1;
-      }
-    }
-    if(repetido){
+  if(*nInscs < CAPACIDADE_MAXIMA){ 
+    
+    if(existeInsc(novoInsc.id_aluno, novoInsc.id_aula, inscricoes, *nInscs)){
       puts("Esta inscrição já existe.");
       return 0;
     }
     else{
-      int alunoExiste = 0; // Checa se o id_aluno informado está atrelado a algum aluno registrado no banco de dados
-      for(int i = 0; i < nAlunos; i++){
-        if(alunos[i].id == novoInsc.id_aluno){
-          alunoExiste = 1;
+      if(existeAluno(novoInsc.id_aluno, alunos, nAlunos) && existeAula(novoInsc.id_aula, aulas, nAulas)){ 
+        struct aula currentAula = getAula(novoInsc.id_aula, aulas, nAulas);
+        if(contaInscs(novoInsc.id_aula, inscricoes, *nInscs) < currentAula.maximo){
+          inscricoes[*nInscs] = novoInsc;
+          *nInscs = *nInscs + 1;
+          return 1;
         }
-      }
-      int aulaExiste = 0; // Checa se o id_aula informado está atrelado a alguma aula registrada no banco de dados
-      for(int i = 0; i < nAulas; i++){
-        if(aulas[i].id == novoInsc.id_aula){
-          aulaExiste = 1;
+        else{
+          puts("O número máximo de inscritos nessa aula foi atingido");
+          return 0;
         }
-      }
-      if(alunoExiste && aulaExiste){ 
-        inscricoes[*nInscs] = novoInsc;
-        *nInscs = *nInscs + 1;
-        return 1;
       }
       else{
         puts("Não existe aula ou aluno com o ID informado para a inscrição.");
@@ -500,5 +525,25 @@ void arquivaInscs(struct inscricao *inscricoes, int nInscs){
     fprintf(fInscs, "%i,%i\n", inscricoes[i].id_aluno, inscricoes[i].id_aula);
   }
   fclose(fInscs);
+}
+
+int existeInsc(int id_aluno, int id_aula, struct inscricao *inscricoes, int nInscs){
+  int existe = 0; // Checa se a inscrição já existe no banco de dados
+  for(int i = 0; i < nInscs; i++){
+    if(inscricoes[i].id_aluno == id_aluno && inscricoes[i].id_aula == id_aula){
+      existe = 1;
+    }
+  }
+  return existe;
+}
+
+int contaInscs(int id_aula, struct inscricao *inscricoes, int nInscs){
+  int inscritos = 0;
+  for(int i = 0; i < nInscs; i++){
+    if(inscricoes[i].id_aula == id_aula){
+      inscritos++;
+    }
+  }
+  return inscritos;
 }
   
