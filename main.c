@@ -67,10 +67,8 @@ int adicionaInsc(struct inscricao novoInsc, struct inscricao *inscricoes, int *n
 void arquivaInscs(struct inscricao *inscricoes, int nInscs);
 int existeInsc(int id_aluno, int id_aula, struct inscricao *inscricoes, int nInscs);
 int contaInscs(int id_aula, struct inscricao *inscricoes, int nInscs);
-//void cancelaInsc(struct inscricao novoInsc);
 
-//void fecharTurma(int n_alunos);
-//void confirmarTurmas();
+// TODO: funções de ordenação por data
 
 // Programa Principal 
 int main (){
@@ -162,17 +160,25 @@ int main (){
       case 5:  // 5- Cancelar inscrição
         if(0){};
         struct inscricao deletaInsc = leInsc();
-
-        // TODO: checar se existe -> existeInsc()
-        
-        // TODO: remover inscrição do array e atualizar n <<<
-        // TODO: escrever novo array no arquivo -> arquivaInscs()
+        if(existeInsc(deletaInsc.id_aluno, deletaInsc.id_aula, inscricoes, nInscs)) {
+        // TODO: Função para remover inscrição do array e atualizar nInscs <<<
+        arquivaInscs(inscricoes, nInscs);
         // TODO: Adicionar uma entrada no arquivo r_incricoesCanceladas.csv <<
+        }
+        else{
+          puts("ERRO! A inscrição não existe.");
+        }       
+        
         break;
   
       case 6:  // 6- Fechar turmas
-      // TODO: Solicita um numero de alunos X < 
-      // TODO: Fechar quaisquer turmas que estejam abaixo de X alunos e gera um arquivo r_aulasCanceladas.csv << R
+        if(0){};
+
+        int nMin;
+        puts("Digite o número número mínimo de alunos: ");
+        scanf("%d", &nMin);
+
+      // TODO: Fechar quaisquer turmas que estejam abaixo de X alunos ( contaInscs() ) e gera um arquivo r_aulasCanceladas.csv << 
         break;
       
       case 7:  // 7- Confirmar turmas
